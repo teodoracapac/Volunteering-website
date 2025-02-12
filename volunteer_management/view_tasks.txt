@@ -1,0 +1,40 @@
+<?php
+session_start();
+include('db_connect.php');
+
+if (!isset($_SESSION['username'])) {
+    header('Location: index.html');
+    exit();
+}
+
+$project_id = $_GET['project_id'];
+
+$query = "SELECT * FROM tasks WHERE id_project = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $project_id);
+$stmt->execute();
+$result = $stmt->get_result();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Tasks</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Tasks for Project ID <?php echo htmlspecialchars($project_id); ?></h1>
+        <ul class="task-list">
+            <?php while ($task = $result->fetch_assoc()) : ?>
+                <li>
+                    <h2><?php echo htmlspecialchars($task['description']); ?></h2>
+                    <p>Type: <?php echo htmlspecialchars($task['type']); ?></p>
+                    <p>Status: <?php echo htmlspecialchars($task['status']); ?></p>
+                    <p>Deadline: <?php echo htmlspecialchars($task['deadline']); ?></p>
+                </li>
+            <?php endwhile; ?>
+        </ul>
+    </div>
+</body>
+</html>
